@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Chatwoot",
+      "type": "shell",
+      "command": "bin/dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
+      "label": "Stop Chatwoot",
+      "type": "shell",
+      "command": "pkill -f 'rails s' 2>/dev/null; pkill -f 'foreman' 2>/dev/null; true",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
+      "label": "Restart Chatwoot",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Stop Chatwoot", "Start Chatwoot"],
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
+      "label": "Build Vite",
+      "type": "shell",
+      "command": "NODE_OPTIONS=\"--max-old-space-size=8192\" bin/vite build --mode=development",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
+      "label": "Rebuild Vite (clear)",
+      "type": "shell",
+      "command": "NODE_OPTIONS=\"--max-old-space-size=8192\" bin/vite build --clear --mode=development",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "manual"
+      }
+    }
+  ]
+}
