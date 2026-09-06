@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Chatwoot",
+      "label": "Start Chatwoot (foreground)",
       "type": "shell",
-      "command": "bin/dev",
+      "command": "bundle exec rails s -b 0.0.0.0 -p 3000",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -19,9 +19,39 @@
       }
     },
     {
+      "label": "Start Vite (foreground)",
+      "type": "shell",
+      "command": "bin/vite dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
+      "label": "Start Chatwoot + Vite (background, persistent)",
+      "type": "shell",
+      "command": "bin/vite dev > /tmp/vite.log 2>&1 & bundle exec rails s -b 0.0.0.0 -p 3000",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": false,
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "manual"
+      }
+    },
+    {
       "label": "Stop Chatwoot",
       "type": "shell",
-      "command": "pkill -f 'rails s' 2>/dev/null; pkill -f 'foreman' 2>/dev/null; true",
+      "command": "pkill -f 'rails s' 2>/dev/null; pkill -f 'vite' 2>/dev/null; true",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -33,7 +63,7 @@
     {
       "label": "Restart Chatwoot",
       "dependsOrder": "sequence",
-      "dependsOn": ["Stop Chatwoot", "Start Chatwoot"],
+      "dependsOn": ["Stop Chatwoot", "Start Chatwoot + Vite (background, persistent)"],
       "runOptions": {
         "runOn": "manual"
       }
