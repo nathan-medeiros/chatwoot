@@ -2,11 +2,7 @@
   "name": "Chatwoot Development Codespace",
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
-  "features": {
-    "ghcr.io/devcontainers/features/sshd:1": {
-      "version": "latest"
-    }
-  },
+
   "settings": {
     "terminal.integrated.shell.linux": "/bin/zsh",
     "extensions.showRecommendationsOnlyOnDemand": true,
@@ -21,6 +17,7 @@
       "**/public/packs": true
     }
   },
+
   "extensions": [
     "Shopify.ruby-lsp",
     "misogi.ruby-rubocop",
@@ -28,9 +25,11 @@
     "github.copilot",
     "mrmlnc.vscode-duplicate"
   ],
+
   "forwardPorts": [8025, 3000, 3036],
-  "postCreateCommand": ".devcontainer/scripts/setup.sh && until pg_isready -h localhost -U postgres 2>/dev/null; do sleep 1; done && POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rake db:chatwoot_prepare && pnpm install",
-  "postStartCommand": "until pg_isready -h localhost -U postgres 2>/dev/null; do sleep 1; done && POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rake db:chatwoot_prepare 2>/dev/null || true && bin/start-all",
+
+  "postCreateCommand": ".devcontainer/scripts/setup.sh && pnpm install",
+  "postStartCommand": "bash -c 'sleep 5 && bin/start-all > /tmp/startup.log 2>&1 &'",
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
