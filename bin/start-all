@@ -1,58 +1,36 @@
 #!/usr/bin/env bash
-# Inicia Vite (dev server) + Rails (web server) em background persistente.
-# Rodado automaticamente pelo postStartCommand do devcontainer.
-# Logs em /tmp/vite.log e /tmp/rails.log
-#
-# auto-chmod: garante execução mesmo se o clone perdeu o bit +x
-
 set -e
-cd "$(dirname "$0")/.."
+cd /workspaces/chatwoot
 
-# Garante que este próprio script e o bin/vite são executáveis
-chmod +x "$0" 2>/dev/null || true
 chmod +x bin/vite 2>/dev/null || true
 
-# Prepara/migra o banco de dados caso não exista ou precise atualizar
-echo "Preparando banco de dados..."
-POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rake db:chatwoot_prepare 2>&1 | tail -5 || true
+echo "Aguardando PostgreSQL..."
+until pg_isready -h localhost -U postgres -p 5432 2>/dev/null; do sleep 1; done
 
-# Mata instâncias anteriores
-pkill -9 -f 'rails s'           2>/dev/null || true
-pkill -9 -f 'vite'              2>/dev/null || true
-fuser -k -9 3036/tcp 2>/dev/null || true
-fuser -k -9 3000/tcp 2>/dev/null || true
+echo "Preparando banco de dados..."
+POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rake db:chatwoot_prepare 2>&1 | tail -3 || true
+
+pkill -9 -f "rails s" 2>/dev/null || true
+pkill -9 -f "vite" 2>/dev/null || true
 sleep 2
 
-# Vite (porta 3036, host 0.0.0.0 via config/vite.json)
-nohup bin/vite dev > /tmp/vite.log 2>&1 &
-VITE_PID=$!
-echo "vite pid: $VITE_PID"
+nohup bash -c "cd /workspaces/chatwoot && bundle exec vite dev" > /tmp/vite.log 2>&1 &
+echo "vite pid: $!"
 
-# Rails (porta 3000, bind 0.0.0.0)
-nohup bundle exec rails s -b 0.0.0.0 -p 3000 > /tmp/rails.log 2>&1 &
-RAILS_PID=$!
-echo "rails pid: $RAILS_PID"
+nohup bash -c "cd /workspaces/chatwoot && bundle exec rails s -b 0.0.0.0 -p 3000" > /tmp/rails.log 2>&1 &
+echo "rails pid: $!"
 
 disown -a 2>/dev/null || true
 
-echo "Chatwoot iniciando..."
-echo "  Rails: http://localhost:3000  (logs: /tmp/rails.log)"
-echo "  Vite:  http://localhost:3036  (logs: /tmp/vite.log)"
-echo "Aguardando ficarem prontos..."
-
-for i in $(seq 1 90); do
-  RAILS_OK=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ 2>/dev/null || echo 000)
-  VITE_OK=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3036/ 2>/dev/null || echo 000)
-  if [[ "$RAILS_OK" =~ ^(200|302)$ ]] && [[ "$VITE_OK" =~ ^(200|304)$ ]]; then
-    echo "Pronto após ${i}s (Rails=$RAILS_OK Vite=$VITE_OK)"
-    exit 0
-  fi
+echo "Aguardando servidores..."
+for i in $(seq 1 120); do
+  RAILS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null || echo 000)
+  VITE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3036/ 2>/dev/null || echo 000)
+  [[ "$RAILS" =~ ^(200|302)$ ]] && [[ "$VITE" =~ ^(200|302|304)$ ]] && echo "Pronto ${i}s (Rails=$RAILS Vite=$VITE)" && exit 0
   sleep 1
 done
 
-echo "AVISO: nem Rails nem Vite responderam em 90s"
-echo "--- /tmp/rails.log (últimas 30) ---"
-tail -30 /tmp/rails.log 2>/dev/null || true
-echo "--- /tmp/vite.log (últimas 30) ---"
-tail -30 /tmp/vite.log 2>/dev/null || true
+echo "AVISO: timeout"
+tail -20 /tmp/rails.log 2>/dev/null
+tail -20 /tmp/vite.log 2>/dev/null
 exit 1
