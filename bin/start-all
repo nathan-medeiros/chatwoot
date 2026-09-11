@@ -12,6 +12,10 @@ cd "$(dirname "$0")/.."
 chmod +x "$0" 2>/dev/null || true
 chmod +x bin/vite 2>/dev/null || true
 
+# Prepara/migra o banco de dados caso não exista ou precise atualizar
+echo "Preparando banco de dados..."
+POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rake db:chatwoot_prepare 2>&1 | tail -5 || true
+
 # Mata instâncias anteriores
 pkill -9 -f 'rails s'           2>/dev/null || true
 pkill -9 -f 'vite'              2>/dev/null || true
