@@ -4,30 +4,14 @@
   "dockerComposeFile": "docker-compose.yml",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/zsh",
-    "editor.formatOnSave": true,
-    "files.trimTrailingWhitespace": true
+    "editor.formatOnSave": true
   },
-  "extensions": [
-    "Shopify.ruby-lsp",
-    "misogi.ruby-rubocop",
-    "davidpallinder.rails-test-runner",
-    "github.copilot"
-  ],
   "forwardPorts": [8025, 3000, 3036],
-  "postCreateCommand": "/bin/bash .devcontainer/scripts/setup.sh && pnpm install",
-  "postStartCommand": "/bin/bash -c 'sleep 5 && /bin/bash bin/start-all > /tmp/startup.log 2>&1 &'",
   "portsAttributes": {
-    "3000": {
-      "label": "Rails Server",
-      "visibility": "public"
-    },
-    "3036": {
-      "label": "Vite Dev Server",
-      "visibility": "public"
-    },
-    "8025": {
-      "label": "Mailhog UI",
-      "visibility": "public"
-    }
-  }
+    "3000": { "label": "Rails Server", "visibility": "public" },
+    "3036": { "label": "Vite Dev Server", "visibility": "public" },
+    "8025": { "label": "Mailhog UI", "visibility": "public" }
+  },
+  "postCreateCommand": "pnpm install",
+  "postStartCommand": "bash -c 'sleep 10 && bin/start-all > /tmp/startup.log 2>&1 &'"
 }
