@@ -2,15 +2,46 @@
   "name": "Chatwoot Development Codespace",
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
   "settings": {
     "terminal.integrated.shell.linux": "/bin/zsh",
     "editor.formatOnSave": true
   },
-  "forwardPorts": [8025, 3000, 3036],
+  "forwardPorts": [
+    3000,
+    3001,
+    3002,
+    3036,
+    8025
+  ],
   "portsAttributes": {
-    "3000": { "label": "Rails Server", "visibility": "public" },
-    "3036": { "label": "Vite Dev Server", "visibility": "public" },
-    "8025": { "label": "Mailhog UI", "visibility": "public" }
+    "3000": {
+      "label": "Rails Server / Chatwoot",
+      "visibility": "public"
+    },
+    "3001": {
+      "label": "KanbanCW API",
+      "visibility": "public"
+    },
+    "3002": {
+      "label": "KanbanCW Frontend",
+      "visibility": "public"
+    },
+    "3036": {
+      "label": "Vite Dev Server",
+      "visibility": "public"
+    },
+    "8025": {
+      "label": "Mailhog UI",
+      "visibility": "public"
+    }
   },
   "postCreateCommand": "pnpm install",
   "postStartCommand": "bash -c 'sleep 10 && bin/start-all > /tmp/startup.log 2>&1 &'"
